@@ -3,7 +3,6 @@ import { Octokit } from "octokit";
 import { tool } from "@langchain/core/tools";
 import { CUSTOM_UI_YIELD_NAME } from "@/utils/server";
 import { dispatchCustomEvent } from "@langchain/core/callbacks/dispatch/web";
-// import { ChatBedrockConverse } from "@langchain/aws";
 import EccGen from "@/components/prebuilt/iec61499fb/ecc_gen";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { ChatOpenAI } from "@langchain/openai";
@@ -21,6 +20,7 @@ const exampleECC = {
     { Source: "Running", Destination: "Stopped", Condition: "Stop" },
   ],
 };
+
 const varDeclaration = z.object({
   Name: z.string().describe("The name of the variable"),
   Type: z.string().describe("The type of the variable (e.g., INT, BOOL)"),
