@@ -10,6 +10,7 @@ import EccGenTable from "@/components/prebuilt/iec61499fb/ecc_table";
 import InterfaceListTable from "@/components/prebuilt/iec61499fb/fbTable";
 import AlgorithmGen from "@/components/prebuilt/iec61499fb/algorithm";
 import FbInterfaceGen from "@/components/prebuilt/iec61499fb/fbinterface";
+import DownloadGen from "@/components/prebuilt/iec61499fb/download";
 
 const exampleECC = {
   ECState: [
@@ -241,7 +242,6 @@ export const iec61499FbTool = tool(
       config
     );
     const result = await iec61499_fb(input);
-    console.log(result.result);
     if (typeof result === "string") {
       await dispatchCustomEvent(
         CUSTOM_UI_YIELD_NAME,
@@ -262,13 +262,14 @@ export const iec61499FbTool = tool(
         output: {
           value: (
             <div className="flex flex-col gap-6">
-              <pre className="bg-gray-100 p-4 rounded-lg">
-                {/* {JSON.stringify(result, null, 2)} */}
-              </pre>
               <FbInterfaceGen InterfaceList={result.result.InterfaceList} />
               <EccGenTable ecc={result.result.BasicFB.ECC} />
               <AlgorithmGen algorithms={result.result.BasicFB.Algorithm} />
               <EccGen ecc={result.result.BasicFB.ECC} />
+              <pre className="bg-gray-100 p-4 rounded-lg">
+                {JSON.stringify(result, null, 2)}
+              </pre>
+              <DownloadGen result={result.result} />
             </div>
           ),
           type: "update",
