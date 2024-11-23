@@ -38,27 +38,20 @@ const invokeModel = async (
   const initialPrompt = ChatPromptTemplate.fromMessages([
     [
       "system",
-      `You are a helpful assistant to build ECC state machine diagram. 
-      Your task is to generate an ECC state machine based on the user's description. 
-      Follow these steps to ensure the logic is clear and follows IEC 61499 standards:
-      
-      1. Start with the "START" state.
-      2. Identify all the necessary states for implementing the logic and give them clear, simple names (avoid spaces or special characters).
-      3. Define the transitions between states, triggered by specific events or data conditions. Each transition should be accompanied by a condition or event.
-      4. Determine the actions to be performed in each state. Each action should include:
-          - Associated "Algorithms" that will be executed when entering the state.
-          - Any event outputs that are triggered by this state.
-      5. Make sure the transitions and conditions between states are well-defined and ensure a clear flow from one state to another.
-      
-      Format the output as follows:
-      - ECC States: List the names of all the states.
-      - ECC Transitions: For each transition, specify the source state, target state, and the event or condition that triggers the transition.
-      - ECC State Actions: For each state, describe the actions performed, including the algorithms and any output events.
-      - Algorithms should be generated in Structured Text (ST) 
+      `You are a helpful assistant to build IEC 61499 Function Block according to the user requirements. 
+
+    Format the output as follows:
+    - FB Interface List: List the names of all the events and data inputs and outputs.
+    - ECC States: List the names of all the states.
+    - ECC Transitions: For each transition, specify the source state, target state, and the event or condition that triggers the transition.
+    - ECC State Actions: For each state, describe the actions performed, including the algorithms and any output events.
+    - Algorithms: should be generated in Structured Text (ST) 
     
-       You're provided a iec61499FbTool which helps to draw the ECC state diagram.
-       Your job is to provide the all necessary information available to build the ECC diagram.
-       Whenever you change anything on ECC always call iec61499FbTool to draw it.
+       You're provided a iec61499FbTool which helps to develop IEC 61499FB , draw ECC and download xml.
+       Your task is to provide all the necessary information, including a fully formatted output, to build an IEC 61499 Function Block (FB) for the iec61499FbTool. 
+          Note that the iec61499FbTool does not retain memory of previously generated outputs, so ensure the provided details are complete and self-contained for each request
+          
+       Whenever you change anything on IEC 61499 FB then always call iec61499FbTool update it and redraw it.
        whether or not you have a tool which can handle the users input, or respond with plain text.`,
     ],
     new MessagesPlaceholder({
@@ -75,18 +68,6 @@ const invokeModel = async (
     model: "gpt-4o",
     streaming: true,
   }).bindTools(tools);
-
-  // const llm = new ChatBedrockConverse({
-  //   model: "anthropic.claude-3-sonnet-20240229-v1:0",
-  //   region: process.env.BEDROCK_AWS_REGION,
-  //   credentials: {
-  //     accessKeyId: process.env.BEDROCK_AWS_ACCESS_KEY_ID ?? "",
-  //     secretAccessKey: process.env.BEDROCK_AWS_SECRET_ACCESS_KEY ?? "",
-  //   },
-  //   temperature: 0,
-  //   maxTokens: 4096,
-  //   maxRetries: 2,
-  // }).bindTools(tools);
 
   const chain = initialPrompt.pipe(llm);
   const result = await chain.invoke(

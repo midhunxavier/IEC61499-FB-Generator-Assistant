@@ -53,7 +53,7 @@ const EccGen: React.FC<HomeProps> = ({ ecc }) => {
 
   return (
     <div>
-      <h1>EC State Machine</h1>
+      <h3 className="text-1xl font-bold mb-6">ECC State Machine</h3>
       {/* Pass the generated diagram as a prop to MermaidDiagram component */}
       <MermaidDiagram diagram={diagram} />
     </div>

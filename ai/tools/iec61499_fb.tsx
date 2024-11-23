@@ -8,6 +8,8 @@ import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { ChatOpenAI } from "@langchain/openai";
 import EccGenTable from "@/components/prebuilt/iec61499fb/ecc_table";
 import InterfaceListTable from "@/components/prebuilt/iec61499fb/fbTable";
+import AlgorithmGen from "@/components/prebuilt/iec61499fb/algorithm";
+import FbInterfaceGen from "@/components/prebuilt/iec61499fb/fbinterface";
 
 const exampleECC = {
   ECState: [
@@ -27,7 +29,6 @@ const varDeclaration = z.object({
   Comment: z.string().optional().describe("Optional comment for the variable"),
 });
 
-// Define the general schema for an Event
 const event = z.object({
   Name: z.string().describe("The name of the event"),
   Comment: z.string().optional().describe("Optional comment for the event"),
@@ -41,20 +42,17 @@ const event = z.object({
     .describe("The list of associated variables"),
 });
 
-// Define the schema for the ECC state
 const ecState = z.object({
   Name: z.string().describe("The name of the state"),
   Comment: z.string().optional().describe("Optional comment for the state"),
 });
 
-// Define the schema for the ECTransition
 const ecTransition = z.object({
   Source: z.string().describe("Source state of the transition"),
   Destination: z.string().describe("Destination state of the transition"),
   Condition: z.string().describe("Condition under which the transition occurs"),
 });
 
-// Define the schema for the Algorithm
 const algorithm = z.object({
   Name: z.string().describe("The name of the algorithm"),
   Comment: z.string().optional().describe("Optional comment for the algorithm"),
@@ -69,7 +67,46 @@ const ecAction = z.object({
     .describe("Optional output event triggered by the action"),
 });
 
-// Now, extend the BasicFB schema to include ECAction within ECState
+const BasicFbSchema = z.object({
+  BasicFB: z.object({
+    ECC: z.object({
+      ECState: z
+        .array(
+          ecState.extend({
+            ECAction: z
+              .array(ecAction)
+              .optional()
+              .describe("List of EC actions for the state"),
+          })
+        )
+        .describe("List of ECC states, with optional EC actions"),
+      ECTransition: z.array(ecTransition).describe("List of ECC transitions"),
+    }),
+    Algorithm: z
+      .array(algorithm)
+      .describe("List of algorithms associated with this FBType"),
+  }),
+});
+
+const ecc_schema = z.object({
+  ECC: z.object({
+    ECState: z
+      .array(
+        ecState.extend({
+          ECAction: z
+            .array(ecAction)
+            .optional()
+            .describe("List of EC actions for the state"),
+        })
+      )
+      .describe("List of ECC states, with optional EC actions"),
+    ECTransition: z.array(ecTransition).describe("List of ECC transitions"),
+  }),
+  Algorithm: z
+    .array(algorithm)
+    .describe("List of algorithms associated with this FBType"),
+});
+
 const fbTypeSchema = z.object({
   GUID: z.string().describe("The unique identifier for the FBType"),
   Name: z.string().describe("The name of the FBType"),
@@ -140,45 +177,6 @@ const fbTypeSchemaLite = z.object({
   }),
 });
 
-const BasicFbSchema = z.object({
-  BasicFB: z.object({
-    ECC: z.object({
-      ECState: z
-        .array(
-          ecState.extend({
-            ECAction: z
-              .array(ecAction)
-              .optional()
-              .describe("List of EC actions for the state"),
-          })
-        )
-        .describe("List of ECC states, with optional EC actions"),
-      ECTransition: z.array(ecTransition).describe("List of ECC transitions"),
-    }),
-    Algorithm: z
-      .array(algorithm)
-      .describe("List of algorithms associated with this FBType"),
-  }),
-});
-
-const ecc_schema = z.object({
-  ECC: z.object({
-    ECState: z
-      .array(
-        ecState.extend({
-          ECAction: z
-            .array(ecAction)
-            .optional()
-            .describe("List of EC actions for the state"),
-        })
-      )
-      .describe("List of ECC states, with optional EC actions"),
-    ECTransition: z.array(ecTransition).describe("List of ECC transitions"),
-  }),
-  Algorithm: z
-    .array(algorithm)
-    .describe("List of algorithms associated with this FBType"),
-});
 const user_question = z.object({
   description: z
     .string()
@@ -189,25 +187,27 @@ async function iec61499_fb(input: z.infer<typeof user_question>) {
   const prompt = ChatPromptTemplate.fromMessages([
     [
       "system",
-      `You are an expert in designing IEC 61499 Execution Control Chart (ECC) diagrams.
-    Your task is to generate an ECC state machine based on the user's description. 
+      `You are an expert in generating  IEC 61499 Function block based on the user's description.
+
+    First task is to identify the  IEC 61499 Function block interface. 
+    Follow these steps to ensure the logic is clear and follows IEC 61499 standards:
+    
+    1. Identify the Event inputs and outputs
+    2. Identify the Input and output variables and its datatypes.
+    3. Datatypes should follow iec 61131-3 standard.
+
+    Next task is to generate an ECC state machine based on the user's description and the identfied function block interface list. 
     Follow these steps to ensure the logic is clear and follows IEC 61499 standards:
     
     1. Start with the "START" state.
     2. Identify all the necessary states for implementing the logic and give them clear, simple names (avoid spaces or special characters).
-    3. Define the transitions between states, triggered by specific events or data conditions. Each transition should be accompanied by a condition or event.
-    4. Determine the actions to be performed in each state. Each action should include:
+    3. Define the transitions between states, triggered by specific events or data conditions (use from fb interface list). Each transition should be accompanied by a condition or event.
+    4. Determine the actions (ecActions) to be performed in each state. Each action should include:
         - Associated "Algorithms" that will be executed when entering the state.
-        - Any event outputs that are triggered by this state.
+        - Any event outputs (use from fb interface list) that are triggered by this state.
     5. Make sure the transitions and conditions between states are well-defined and ensure a clear flow from one state to another.
     
-    Format the output as follows:
-    - ECC States: List the names of all the states.
-    - ECC Transitions: For each transition, specify the source state, target state, and the event or condition that triggers the transition.
-    - ECC State Actions: For each state, describe the actions performed, including the algorithms and any output events.
-    - Algorithms should be generated in Structured Text (ST) 
-    
-    User description of the IEC 61499 FB ECC to be generated:`,
+    User description of the IEC 61499 FB to be generated:`,
     ],
     ["human", "{input}"],
   ]);
@@ -247,7 +247,7 @@ export const iec61499FbTool = tool(
         CUSTOM_UI_YIELD_NAME,
         {
           output: {
-            value: <p>{result}</p>,
+            value: <p>{JSON.stringify(result, null, 2)}</p>,
             type: "update",
           },
         },
@@ -261,10 +261,14 @@ export const iec61499FbTool = tool(
       {
         output: {
           value: (
-            <div>
-              {/* <InterfaceListTable data={result.result.InterfaceList} /> */}
-              <EccGen ecc={result.result.BasicFB.ECC} />
+            <div className="flex flex-col gap-6">
+              <pre className="bg-gray-100 p-4 rounded-lg">
+                {/* {JSON.stringify(result, null, 2)} */}
+              </pre>
+              <FbInterfaceGen InterfaceList={result.result.InterfaceList} />
               <EccGenTable ecc={result.result.BasicFB.ECC} />
+              <AlgorithmGen algorithms={result.result.BasicFB.Algorithm} />
+              <EccGen ecc={result.result.BasicFB.ECC} />
             </div>
           ),
           type: "update",
