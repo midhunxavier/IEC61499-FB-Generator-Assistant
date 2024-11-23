@@ -67,6 +67,7 @@ const invokeModel = async (
     temperature: 0,
     model: "gpt-4o",
     streaming: true,
+    openAIApiKey: process.env.OPENAI_API_KEY ?? "",
   }).bindTools(tools);
 
   const chain = initialPrompt.pipe(llm);

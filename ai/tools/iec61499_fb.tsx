@@ -217,6 +217,7 @@ async function iec61499_fb(input: z.infer<typeof user_question>) {
     temperature: 0,
     model: "gpt-4o-mini",
     streaming: true,
+    openAIApiKey: process.env.OPENAI_API_KEY ?? "",
   });
 
   const structuredLlm = llm.withStructuredOutput(fbTypeSchemaLite);
