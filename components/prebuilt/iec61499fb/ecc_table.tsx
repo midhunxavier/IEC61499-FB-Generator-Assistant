@@ -29,11 +29,11 @@ type HomeProps = {
 const EccGenTable: React.FC<HomeProps> = ({ ecc }) => {
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">ECC Overview</h1>
+      <h1 className="text-xl font-bold mb-6">ECC Overview</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {ecc.ECState.map((state, index) => (
           <Card key={index} className="max-w-sm">
-            <h5 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+            <h5 className="text-2xs font-bold tracking-tight text-gray-900 dark:text-white">
               {state.Name}
             </h5>
             {state.Comment && (
