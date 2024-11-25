@@ -95,12 +95,12 @@ export default function Chat() {
         }
       }
     })();
-
+ 
     setElements(newElements);
     setInput("");
     setSelectedFile(undefined);
   }
-  console.log(process.env)
+  console.log(process.env.NEXT_PUBLIC_OPENAI_API_KEY)
 
   return (
     <div className="w-[70vw] overflow-y-scroll h-[80vh] flex flex-col gap-4 mx-auto border-[1px] border-gray-200 rounded-lg p-3 shadow-sm bg-gray-50/25">

@@ -22,7 +22,7 @@ Next, if you plan on using the existing pre-built UI components, you'll need to 
 
 Copy the [`.env.example`](./.env.example) file to `.env`:
 
-The `OPENAI_API_KEY` is required. LangSmith keys are optional, but highly recommended if you plan on developing this application further.
+The `NEXT_PUBLIC_OPENAI_API_KEY` is required. LangSmith keys are optional, but highly recommended if you plan on developing this application further.
 
 Get your OpenAI API key from the [OpenAI dashboard](https://platform.openai.com/login?launch).
 
@@ -37,7 +37,7 @@ LANGCHAIN_CALLBACKS_BACKGROUND=true
 LANGCHAIN_TRACING_V2=true
 # -----------------------------------------------------
 
-OPENAI_API_KEY=...
+NEXT_PUBLIC_OPENAI_API_KEY=...
 ```
 
 ### Running the Application
