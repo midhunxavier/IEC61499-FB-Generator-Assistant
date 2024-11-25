@@ -69,7 +69,6 @@ const invokeModel = async (
     streaming: true,
     openAIApiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY ?? "",
   }).bindTools(tools);
-  console.log(process.env.NEXT_PUBLIC_OPENAI_API_KEY,'API KEY ')
   const chain = initialPrompt.pipe(llm);
   const result = await chain.invoke(
     {
