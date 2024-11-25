@@ -8,7 +8,7 @@ import { useActions } from "@/utils/client";
 import { LocalContext } from "@/app/shared";
 import { HumanMessageText } from "./message";
 
-export interface ChatProps {}
+export interface ChatProps { }
 
 function convertFileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -54,9 +54,9 @@ export default function Chat() {
       file:
         base64File && fileExtension
           ? {
-              base64: base64File,
-              extension: fileExtension,
-            }
+            base64: base64File,
+            extension: fileExtension,
+          }
           : undefined,
     });
 
@@ -75,7 +75,7 @@ export default function Chat() {
     (async () => {
       let lastEvent = await element.lastEvent;
       if (typeof lastEvent === "object") {
-        if (lastEvent["invokeModel"]["result"]) {
+        if (lastEvent["invokeModel"] && lastEvent["invokeModel"]["result"]) {
           setHistory((prev) => [
             ...prev,
             ["user", input],
@@ -95,17 +95,19 @@ export default function Chat() {
         }
       }
     })();
- 
+
     setElements(newElements);
     setInput("");
     setSelectedFile(undefined);
   }
 
   return (
-    <div className="w-[70vw] overflow-y-scroll h-[80vh] flex flex-col gap-4 mx-auto border-[1px] border-gray-200 rounded-lg p-3 shadow-sm bg-gray-50/25">
-      <LocalContext.Provider value={onSubmit}>
-        <div className="flex flex-col w-full gap-1 mt-auto">{elements}</div>
-      </LocalContext.Provider>
+    <div className="w-[70vw]  h-[80vh] flex flex-col gap-4 mx-auto border-[1px] border-gray-200 rounded-lg p-3 shadow-sm bg-gray-50/25">
+      <div className="overflow-y-scroll flex-grow overflow-y-auto flex flex-col-reverse p-3">
+        <LocalContext.Provider value={onSubmit}>
+          <div className="flex flex-col w-full gap-1 mt-auto">{elements}</div>
+        </LocalContext.Provider>
+      </div>
       <form
         onSubmit={async (e) => {
           e.stopPropagation();
