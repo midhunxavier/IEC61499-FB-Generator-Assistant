@@ -182,13 +182,21 @@ const user_question = z.object({
   description: z
     .string()
     .describe("Description to generate or edit ECC state machine"),
+  prev_fb: z.string().describe("previously developed fb schema"),
 });
 
 async function iec61499_fb(input: z.infer<typeof user_question>) {
   const prompt = ChatPromptTemplate.fromMessages([
     [
       "system",
-      `You are an expert in generating  IEC 61499 Function block based on the user's description.
+      `You are an expert in generating or updating  IEC 61499 Function block based on the user's description.
+
+    previous FB generated:
+    ${input.prev_fb}
+
+    if there is information regarding previous fb then just modify according to user description.
+
+    if there is no information regarding the previous fb then do it from scratch.
 
     First task is to identify the  IEC 61499 Function block interface. 
     Follow these steps to ensure the logic is clear and follows IEC 61499 standards:
@@ -200,15 +208,16 @@ async function iec61499_fb(input: z.infer<typeof user_question>) {
     Next task is to generate an ECC state machine based on the user's description and the identfied function block interface list. 
     Follow these steps to ensure the logic is clear and follows IEC 61499 standards:
     
-    1. Start with the "START" state.
+    1. Start with the "START" state and there will be atleaset two states in ECC state machine.
     2. Identify all the necessary states for implementing the logic and give them clear, simple names (avoid spaces or special characters).
     3. Define the transitions between states, triggered by specific events or data conditions (use from fb interface list). Each transition should be accompanied by a condition or event.
     4. Determine the actions (ecActions) to be performed in each state. Each action should include:
         - Associated "Algorithms" that will be executed when entering the state.
         - Any event outputs (use from fb interface list) that are triggered by this state.
     5. Make sure the transitions and conditions between states are well-defined and ensure a clear flow from one state to another.
-    
-    User description of the IEC 61499 FB to be generated:`,
+
+
+    User description of the IEC 61499 FB to be generated or modified:`,
     ],
     ["human", "{input}"],
   ]);
@@ -223,7 +232,10 @@ async function iec61499_fb(input: z.infer<typeof user_question>) {
   const structuredLlm = llm.withStructuredOutput(fbTypeSchemaLite);
   const chain = prompt.pipe(structuredLlm);
 
-  const result = await chain.invoke({ input: input.description });
+  const result = await chain.invoke({
+    input: input.description,
+    prev_fb: input.prev_fb,
+  });
 
   return {
     result: result,
@@ -232,16 +244,16 @@ async function iec61499_fb(input: z.infer<typeof user_question>) {
 
 export const iec61499FbTool = tool(
   async (input, config) => {
-    await dispatchCustomEvent(
-      CUSTOM_UI_YIELD_NAME,
-      {
-        output: {
-          value: <p>{JSON.stringify(input, null, 2)}</p>,
-          type: "append",
-        },
-      },
-      config
-    );
+    // await dispatchCustomEvent(
+    //   CUSTOM_UI_YIELD_NAME,
+    //   {
+    //     output: {
+    //       value: <p>{JSON.stringify(input, null, 2)}</p>,
+    //       type: "append",
+    //     },
+    //   },
+    //   config
+    // );
     const result = await iec61499_fb(input);
     if (typeof result === "string") {
       await dispatchCustomEvent(
@@ -264,12 +276,13 @@ export const iec61499FbTool = tool(
           value: (
             <div className="flex flex-col gap-6">
               <FbInterfaceGen InterfaceList={result.result.InterfaceList} />
+              <EccGen ecc={result.result.BasicFB.ECC} />
               <EccGenTable ecc={result.result.BasicFB.ECC} />
               <AlgorithmGen algorithms={result.result.BasicFB.Algorithm} />
-              <EccGen ecc={result.result.BasicFB.ECC} />
-              <pre className="bg-gray-100 p-4 rounded-lg">
+
+              {/* <pre className="bg-gray-100 p-4 rounded-lg">
                 {JSON.stringify(result, null, 2)}
-              </pre>
+              </pre> */}
               <DownloadGen result={result.result} />
             </div>
           ),

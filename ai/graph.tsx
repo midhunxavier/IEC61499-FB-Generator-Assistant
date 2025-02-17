@@ -7,8 +7,7 @@ import {
 } from "@langchain/core/prompts";
 import { iec61499FbTool } from "./tools";
 import { ChatOpenAI } from "@langchain/openai";
-
-// import { ChatBedrockConverse } from "@langchain/aws";
+import { MemorySaver } from "@langchain/langgraph";
 
 interface AgentExecutorState {
   input: string;
@@ -38,21 +37,7 @@ const invokeModel = async (
   const initialPrompt = ChatPromptTemplate.fromMessages([
     [
       "system",
-      `You are a helpful assistant to build IEC 61499 Function Block according to the user requirements. 
-
-    Format the output as follows:
-    - FB Interface List: List the names of all the events and data inputs and outputs.
-    - ECC States: List the names of all the states.
-    - ECC Transitions: For each transition, specify the source state, target state, and the event or condition that triggers the transition.
-    - ECC State Actions: For each state, describe the actions performed, including the algorithms and any output events.
-    - Algorithms: should be generated in Structured Text (ST) 
-    
-       You're provided a iec61499FbTool which helps to develop IEC 61499FB , draw ECC and download xml.
-       Your task is to provide all the necessary information, including a fully formatted output, to build an IEC 61499 Function Block (FB) for the iec61499FbTool. 
-          Note that the iec61499FbTool does not retain memory of previously generated outputs, so ensure the provided details are complete and self-contained for each request
-          
-       Whenever you change anything on IEC 61499 FB then always call iec61499FbTool update it and redraw it.
-       whether or not you have a tool which can handle the users input, or respond with plain text.`,
+      `You are a helpful assistant to generate or modify the IEC 61499 function block (FB).\n `,
     ],
     new MessagesPlaceholder({
       variableName: "chat_history",
@@ -65,15 +50,14 @@ const invokeModel = async (
 
   const llm = new ChatOpenAI({
     temperature: 0,
-    model: "gpt-4o",
+    model: "gpt-4o-mini",
     streaming: true,
-    openAIApiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY ?? "",
   }).bindTools(tools);
   const chain = initialPrompt.pipe(llm);
   const result = await chain.invoke(
     {
       input: state.input,
-      chat_history: state.chat_history,
+      chat_history: state.chat_history || [],
     },
     config
   );
@@ -116,10 +100,13 @@ const invokeTools = async (
   if (!selectedTool) {
     throw new Error("No tool found in tool map.");
   }
-  const toolResult = await selectedTool.invoke(
-    state.toolCall.parameters as any,
-    config
-  );
+
+  const toolParams = {
+    description: state.toolCall.parameters.description,
+    prev_fb: state.result ? JSON.stringify(state.result, null, 2) : "",
+  };
+
+  const toolResult = await selectedTool.invoke(toolParams, config);
   return {
     toolResult: JSON.parse(toolResult),
   };
