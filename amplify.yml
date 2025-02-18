@@ -3,12 +3,19 @@ backend:
   phases:
     build:
       commands:
+        # Step 1: Sync package.json and package-lock.json
+        - npm install
+        # Step 2: Run npm ci with caching
         - npm ci --cache .npm --prefer-offline
+        # Step 3: Deploy the backend
         - npx ampx pipeline-deploy --branch $AWS_BRANCH --app-id $AWS_APP_ID
 frontend:
   phases:
     build:
       commands:
+        # Step 1: Sync package.json and package-lock.json
+        - npm install
+        # Step 2: Build the frontend
         - npm run build
   artifacts:
     baseDirectory: .next
