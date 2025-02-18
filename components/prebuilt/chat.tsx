@@ -7,7 +7,7 @@ import { EndpointsContext } from "@/app/agent";
 import { useActions } from "@/utils/client";
 import { HumanMessageText } from "./message";
 import { Content } from "@radix-ui/react-dropdown-menu";
-
+import { LocalContext } from "@/app/shared";
 export interface ChatProps {}
 
 function convertFileToBase64(file: File): Promise<string> {
@@ -118,31 +118,26 @@ export default function Chat() {
   }
 
   return (
-    <div className="w-[70vw] h-[80vh] flex flex-row gap-4 mx-auto border-[1px] border-gray-200 rounded-lg p-3 shadow-sm bg-gray-50/25">
-      {/* Left Side - Previously Generated FBs */}
-      <div className="w-1/2 overflow-y-auto flex flex-col-reverse p-3 border-r border-gray-200">
-        <h2 className="text-lg font-semibold mb-2">Previously Generated FBs</h2>
-        <div className="flex flex-col w-full gap-1">{elements}</div>
+    <div className="w-[70vw]  h-[80vh] flex flex-col gap-4 mx-auto border-[1px] border-gray-200 rounded-lg p-3 shadow-sm bg-gray-50/25">
+      <div className="overflow-y-scroll flex-grow overflow-y-auto flex flex-col-reverse p-3">
+        <LocalContext.Provider value={onSubmit}>
+          <div className="flex flex-col w-full gap-1 mt-auto">{elements}</div>
+        </LocalContext.Provider>
       </div>
-
-      {/* Right Side - Final FB Result */}
-      <div className="w-1/2 overflow-y-auto flex flex-col-reverse p-3">
-        <h2 className="text-lg font-semibold mb-2">Final FB Result</h2>
-        <div className="flex flex-col w-full gap-1">{newElements}</div>
-      </div>
-
-      {/* Input Form Below */}
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-[70vw] flex flex-row gap-2 p-3 bg-white shadow-lg rounded-lg border border-gray-200">
+      <form
+        onSubmit={async (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          await onSubmit(input);
+        }}
+        className="w-full flex flex-row gap-2"
+      >
         <Input
-          placeholder="Develop IEC 61499 PID controller FB?"
+          placeholder="Develop IEC 61499 PID controller FB?
+
+"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault(); // Prevents accidental form submission reloading the page
-              onSubmit(input);
-            }
-          }}
         />
         <div className="w-[300px]">
           <Input
@@ -157,10 +152,8 @@ export default function Chat() {
             }}
           />
         </div>
-        <Button type="submit" onClick={() => onSubmit(input)}>
-          Submit
-        </Button>
-      </div>
+        <Button type="submit">Submit</Button>
+      </form>
     </div>
   );
 }
