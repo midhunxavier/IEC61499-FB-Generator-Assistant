@@ -10,8 +10,6 @@
     "format": "yarn prettier --write ./app ./ai ./components ./utils ./lib"
   },
   "dependencies": {
-    "@babel/plugin-transform-class-properties": "^7.25.9",
-    "@babel/plugin-transform-object-rest-spread": "^7.25.9",
     "@langchain/community": "^0.3.15",
     "@langchain/core": "^0.3.18",
     "@langchain/langgraph": "^0.2.22",
@@ -29,19 +27,16 @@
     "@radix-ui/react-tabs": "^1.0.4",
     "@radix-ui/react-tooltip": "^1.0.7",
     "ai": "^3.2.43",
-    "aws-cdk-lib": "^2.179.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
-    "constructs": "^10.4.2",
-    "core-js": "^3.40.0",
     "date-fns": "^3.6.0",
     "flowbite-react": "^0.10.2",
-    "glob": "^11.0.1",
+    "ignore": "^5.2.0",
     "jotai": "^2.8.2",
     "langchain": "^0.2.12",
     "lucide-react": "^0.379.0",
     "mermaid": "^11.3.0",
-    "next": "^14.2.24",
+    "next": "14.2.3",
     "octokit": "^4.0.2",
     "prettier": "^3.2.5",
     "react": "^18",
@@ -56,7 +51,7 @@
   },
   "devDependencies": {
     "@aws-amplify/backend": "^1.14.1",
-    "@aws-amplify/backend-cli": "^0.9.5",
+    "@aws-amplify/backend-cli": "^1.4.10",
     "@types/dompurify": "^3.2.0",
     "@types/node": "^20",
     "@types/react": "^18",
@@ -65,6 +60,6 @@
     "eslint-config-next": "14.2.3",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5.7.3"
+    "typescript": "^5"
   }
 }
