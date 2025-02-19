@@ -5,9 +5,9 @@ const schema = a.schema({
     .model({
       usedTokens: a.integer(),
       remainingTokens: a.integer(),
-      allowedTokens: a.integer(),
+      allowedTokens: a.integer().default(5000),
     })
-    .authorization((allow) => [allow.publicApiKey()]),
+    .authorization((allow) => [allow.owner()]),
 });
 
 export type Schema = ClientSchema<typeof schema>;
