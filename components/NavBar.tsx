@@ -32,7 +32,7 @@ const defaultRoutes = [
     loggedIn: false,
   },
   {
-    href: "/contactus",
+    href: "contactus",
     label: "Contact us",
     loggedIn: false,
   },
@@ -102,22 +102,6 @@ export default function NavBar({ isSignedIn }: { isSignedIn: boolean }) {
             FBuilder AI
           </a>
         </div>
-
-        {!authCheck && (
-          <Flex
-            as="nav"
-            alignItems="center"
-            justifyContent="center"
-            style={{ flexGrow: 2 }}
-            gap="3rem"
-          >
-            {defaultRoutes.map((route, index) => (
-              <Link key={index} href={route.href}>
-                {route.label}
-              </Link>
-            ))}
-          </Flex>
-        )}
 
         {authCheck && user && (
           <div style={{ textAlign: "right" }}>
